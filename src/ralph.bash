@@ -154,15 +154,22 @@ main() {
 		fi
 	fi
 
+	local ITERATION_DIR
+	ITERATION_DIR="${RALPH_DIR}/$(date +%Y%m%d_%H%M%S)"
+
 	# Do iterations
 	for i in $(seq 1 "${ITERATIONS}"); do
 		verbose "Iteration ${i}/${ITERATIONS}"
-		ralph-loop "${TASK_FILE}"
+		ralph-loop "${TASK_FILE}" "${ITERATION_DIR}"
 	done
 }
 
 ralph-loop() {
-	verbose "Processing task file: $1"
+	verbose "Processing task file $1 in dir $2"
+
+	local TASK_FILE="$1"
+	local ITERATION_DIR="$2"
+
 	
 }
 
