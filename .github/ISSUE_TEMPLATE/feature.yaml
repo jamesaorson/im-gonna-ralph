@@ -1,0 +1,16 @@
+name: Feature Request
+description: Request a new feature
+title: "[Feature] "
+labels:
+  - enhancement
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for shoveling more work onto us!
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Extra info
+      description: Tell us whatever

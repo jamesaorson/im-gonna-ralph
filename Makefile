@@ -13,6 +13,8 @@ UNAME_S := $(shell uname -s)
 
 INSTALL_DIR ?= /usr/local/bin
 
+RALPH := $(CURDIR)/src/ralph
+
 ##@ Environment setup
 
 .PHONY: setup
@@ -56,7 +58,7 @@ install: env-INSTALL_DIR ## Install the project
 	else
 		INSTALL="sudo install"
 	fi
-	$${INSTALL} -l s -m 755 "$(CURDIR)/ralph" "$(INSTALL_DIR)/ralph"
+	$${INSTALL} -l s -m 755 "$(RALPH)" "$(INSTALL_DIR)/ralph"
 
 ##@ Helpers
 
