@@ -13,7 +13,9 @@ UNAME_S := $(shell uname -s)
 
 INSTALL_DIR ?= /usr/local/bin
 
-RALPH := $(CURDIR)/src/ralph
+RALPH := $(CURDIR)/src/ralph.bash
+
+SHELL_FILES := $(shell find . -type f -name "*.sh" -o -name "*.bash")
 
 ##@ Environment setup
 
@@ -42,7 +44,7 @@ check: check/lint ## Check code for linting and quality issues
 
 .PHONY: check/lint
 check/lint: ## Check code for linting and quality issues
-	shellcheck ralph
+	shellcheck $(SHELL_FILES)
 
 ##@ Utilities
 
