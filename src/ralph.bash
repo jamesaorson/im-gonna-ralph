@@ -226,7 +226,7 @@ ralph-loop() {
 	# If specified, import history files from another run directory
 	if [[ -n "${IMPORT_RUN}" ]]; then
 		if [[ -d "${IMPORT_RUN}" ]]; then
-			echo "   (Importing history from ${IMPORT_RUN}...)"
+			echo "   (Importing history from $(realpath ${IMPORT_RUN})...)"
 			# Iterate over iteration files in sorted order
 			for f in "${IMPORT_RUN}"/iteration_*.txt; do
 				# If no matching files, the glob remains literal; skip non-existent
