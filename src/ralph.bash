@@ -10,6 +10,7 @@ ITERATIONS=10
 INIT=false
 TASK_FILE=""
 RALPH_DIR="$(pwd)/.ralph"
+DONE_FILE="${RALPH_DIR}/.done"
 DEFAULT_TASK_FILE="${RALPH_DIR}/tasks"
 
 usage() {
@@ -144,10 +145,10 @@ main() {
 	verbose "Iterations: ${ITERATIONS}"
 	verbose "Force? ${FORCE}"
 
-	if [[ -f "${RALPH_DIR}/.done" ]]; then
+	if [[ -f "${DONE_FILE}" ]]; then
 		if ${FORCE}; then
-			verbose "Force flag is set. Removing .done file to allow re-execution."
-			rm -f "${RALPH_DIR}/.done"
+			verbose "Force flag is set. Removing ${DONE_FILE} file to allow re-execution."
+			rm -f "${DONE_FILE}"
 		else
 			echo "Task already completed. Use --force to re-run."
 			exit 0
@@ -156,21 +157,84 @@ main() {
 
 	local ITERATION_DIR
 	ITERATION_DIR="${RALPH_DIR}/$(date +%Y%m%d_%H%M%S)"
+	mkdir -p "${ITERATION_DIR}"
+
+	if [[ -f "${RALPH_DIR}/.done" ]]; then
+		echo "Task already completed. Use --force to re-run."
+		exit 0
+	fi
 
 	# Do iterations
 	for i in $(seq 1 "${ITERATIONS}"); do
 		verbose "Iteration ${i}/${ITERATIONS}"
-		ralph-loop "${TASK_FILE}" "${ITERATION_DIR}"
+		ralph-loop "${i}" "${TASK_FILE}" "${ITERATION_DIR}"
 	done
 }
 
 ralph-loop() {
 	verbose "Processing task file $1 in dir $2"
 
-	local TASK_FILE="$1"
-	local ITERATION_DIR="$2"
+	local ITERATION
+	ITERATION="$1"
+	shift
+	local TASK_FILE
+	TASK_FILE="$1"
+	shift
+	local ITERATION_DIR
+	ITERATION_DIR="$1"
+	shift
 
+	# Adapted from https://gist.github.com/Tavernari/01d21584f8d4d8ccea8ceca305656ab3
+	local HISTORY_CONTEXT=""
 	
+	if [ "${ITERATION}" -gt 0 ]; then
+		echo "   (Reading memory from previous iterations...)"
+		for (( i=0; i < ITERATION; i++ )); do
+			local PREV_FILE
+			PREV_FILE="${ITERATION_DIR}/iteration_$i.txt"
+			if [ -f "$PREV_FILE" ]; then
+				STEP_CONTENT=$(cat "$PREV_FILE")
+				HISTORY_CONTEXT += $'\n'"--- HISTORY (Iteration #${i}) ---"$'\n'"${STEP_CONTENT}"$'\n'
+			fi
+		done
+	fi
+
+		FULL_PROMPT="
+$(cat "$TASK_FILE")
+
+====== SHORT-TERM MEMORY (What you already tried) ======
+${HISTORY_CONTEXT}
+========================================================
+
+LOOP INSTRUCTIONS:
+1. You are running in an autonomous loop.
+2. Analyze the history above. If you tried something and it failed, try a different approach.
+3. YOU are responsible for ensuring the code works. Run your own internal checks/tests if possible.
+4. If the task is 100% COMPLETE and TESTED, create a '${DONE_FILE}' file.
+5. If not finished, briefly describe your progress and what you expect should be done in the next iteration.
+"
+
+		OUTPUT=$(auggie --print --quiet "$FULL_PROMPT")
+
+		local CURRENT_LOG_FILE
+		CURRENT_LOG_FILE="${ITERATION_DIR}/iteration_${ITERATION}.txt"
+		echo "${OUTPUT}" > "${CURRENT_LOG_FILE}"
+		echo "Thought process saved: ${CURRENT_LOG_FILE}"
+
+		if [[ -f "${DONE_FILE}" ]]; then
+			echo "-----------------------------------"
+			echo "Agent reported completion."
+			echo "Full history available at: ${ITERATION_DIR}"
+			touch "${DONE_FILE}"
+			exit 0
+		fi
+		((ITERATION++))
+		# Delay to avoid rate limits
+		sleep 2
+	done
+
+	fatal "Reached maximum iterations ($MAX_ITERATIONS) without completion."
+	exit 1
 }
 
 main "$@"
