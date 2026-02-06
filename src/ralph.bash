@@ -108,6 +108,8 @@ init() {
 			echo ".ralph" >> "$(pwd)/.gitignore"
 			echo "Added .ralph to .gitignore"
 		fi
+	else
+		echo "No .gitignore found. Skipping..."
 	fi
 }
 
@@ -137,7 +139,7 @@ main() {
 		fi
 	fi
 
-	if [[ "${TASK_FILE}" != "${STDIN}" && ! -f "${TASK_FILE}" ]]; then
+	if [[ "${TASK_FILE}" != "${STDIN}" && ! -f "${TASK_FILE}" && ! -e "${TASK_FILE}" ]]; then
 		fatal "Task file not found: ${TASK_FILE}"
 	fi
 	

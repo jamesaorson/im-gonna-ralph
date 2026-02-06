@@ -20,7 +20,7 @@ SHELL_FILES := $(shell find . -type f -name "*.sh" -o -name "*.bash")
 ##@ Environment setup
 
 .PHONY: setup
-setup: setup/shellcheck ## Setup development environment
+setup: setup/copilot setup/shellcheck ## Setup development environment
 
 .PHONY: setup/copilot
 setup/copilot:
