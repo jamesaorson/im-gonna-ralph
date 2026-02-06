@@ -1,0 +1,21 @@
+name: Check code quality
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+defaults:
+  run:
+    shell: bash
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Setup shellcheck
+        run: |
+          make setup/shellcheck
+      - name: Check code quality
+        run: |
+          make check
