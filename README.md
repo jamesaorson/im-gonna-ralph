@@ -122,6 +122,16 @@ ralph --iterations 20
 ralph --force
 ```
 
+#### Switch AI model
+
+```bash
+ralph -m gpt-5
+# or
+ralph --model gpt-4.1
+```
+
+Note: Model names supported depend on your installed GitHub Copilot CLI; check its documentation for available models.
+
 #### Enable verbose output
 
 ```bash
