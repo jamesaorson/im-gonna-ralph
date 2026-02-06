@@ -189,7 +189,7 @@ echo "Fix all TODO comments in the codebase" | ralph --iterations 15
 ### Example 3: Refactoring
 
 ```bash
-ralph --file .ralph/refactor-task.md --force --verbose
+ralph --file .ralph/refactor-task.md --verbose
 ```
 
 ## Contributing
@@ -206,6 +206,6 @@ This project is licensed under the terms specified in the [LICENSE](LICENSE) fil
 
 ## Acknowledgments
 
-- Inspired by autonomous agent patterns and agentic loops
-- Powered by [GitHub Copilot CLI](https://githubnext.com/projects/copilot-cli/)
+- Inspired by [Geoffrey Huntley](https://ghuntley.com/loop/)
 - Loop approach adapted from [this gist](https://gist.github.com/Tavernari/01d21584f8d4d8ccea8ceca305656ab3)
+- Powered by [GitHub Copilot CLI](https://githubnext.com/projects/copilot-cli/)
