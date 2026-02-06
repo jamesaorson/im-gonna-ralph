@@ -169,6 +169,8 @@ main() {
 		verbose "Iteration ${i}/${ITERATIONS}"
 		ralph-loop "${i}" "${TASK_FILE}" "${ITERATION_DIR}"
 	done
+
+	fatal "Reached maximum iterations ($MAX_ITERATIONS) without completion."
 }
 
 ralph-loop() {
@@ -194,12 +196,12 @@ ralph-loop() {
 			PREV_FILE="${ITERATION_DIR}/iteration_$i.txt"
 			if [ -f "$PREV_FILE" ]; then
 				STEP_CONTENT=$(cat "$PREV_FILE")
-				HISTORY_CONTEXT += $'\n'"--- HISTORY (Iteration #${i}) ---"$'\n'"${STEP_CONTENT}"$'\n'
+				HISTORY_CONTEXT+=$'\n'"--- HISTORY (Iteration #${i}) ---"$'\n'"${STEP_CONTENT}"$'\n'
 			fi
 		done
 	fi
 
-		FULL_PROMPT="
+	FULL_PROMPT="
 $(cat "$TASK_FILE")
 
 ====== SHORT-TERM MEMORY (What you already tried) ======
@@ -214,27 +216,22 @@ LOOP INSTRUCTIONS:
 5. If not finished, briefly describe your progress and what you expect should be done in the next iteration.
 "
 
-		OUTPUT=$(auggie --print --quiet "$FULL_PROMPT")
+	OUTPUT=$(copilot --allow-all-tools --allow-all-urls -p "$FULL_PROMPT")
 
-		local CURRENT_LOG_FILE
-		CURRENT_LOG_FILE="${ITERATION_DIR}/iteration_${ITERATION}.txt"
-		echo "${OUTPUT}" > "${CURRENT_LOG_FILE}"
-		echo "Thought process saved: ${CURRENT_LOG_FILE}"
+	local CURRENT_LOG_FILE
+	CURRENT_LOG_FILE="${ITERATION_DIR}/iteration_${ITERATION}.txt"
+	echo "${OUTPUT}" > "${CURRENT_LOG_FILE}"
+	echo "Thought process saved: ${CURRENT_LOG_FILE}"
 
-		if [[ -f "${DONE_FILE}" ]]; then
-			echo "-----------------------------------"
-			echo "Agent reported completion."
-			echo "Full history available at: ${ITERATION_DIR}"
-			touch "${DONE_FILE}"
-			exit 0
-		fi
-		((ITERATION++))
-		# Delay to avoid rate limits
-		sleep 2
-	done
-
-	fatal "Reached maximum iterations ($MAX_ITERATIONS) without completion."
-	exit 1
+	if [[ -f "${DONE_FILE}" ]]; then
+		echo "-----------------------------------"
+		echo "Agent reported completion."
+		echo "Full history available at: ${ITERATION_DIR}"
+		exit 0
+	fi
+	((ITERATION++))
+	# Delay to avoid rate limits
+	sleep 2
 }
 
 main "$@"

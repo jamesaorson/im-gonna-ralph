@@ -11,7 +11,7 @@ endif
 
 UNAME_S := $(shell uname -s)
 
-INSTALL_DIR ?= /usr/local/bin
+PREFIX ?= /usr/local/bin
 
 RALPH := $(CURDIR)/src/ralph.bash
 
@@ -74,14 +74,14 @@ clean: ## Clean build artifacts
 	rm -rf $(CURDIR)/.ralph
 
 .PHONY: install
-install: env-INSTALL_DIR ## Install the project
+install: env-PREFIX ## Install the project
 	INSTALL="install"
-	if [ -w "$(INSTALL_DIR)" ]; then \
+	if [ -w "$(PREFIX)" ]; then \
 		INSTALL="install"
 	else
 		INSTALL="sudo install"
 	fi
-	$${INSTALL} -l s -m 755 "$(RALPH)" "$(INSTALL_DIR)/ralph"
+	$${INSTALL} -l s -m 755 "$(RALPH)" "$(PREFIX)/ralph"
 
 ##@ Helpers
 
