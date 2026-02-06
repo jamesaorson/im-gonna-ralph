@@ -188,8 +188,6 @@ main() {
 }
 
 ralph-loop() {
-	verbose "Processing task file $1 in dir $2"
-
 	local ITERATION
 	ITERATION="$1"
 	shift
@@ -199,6 +197,8 @@ ralph-loop() {
 	local ITERATION_DIR
 	ITERATION_DIR="$1"
 	shift
+
+	verbose "Processing task file ${TASK_FILE} in ${ITERATION_DIR}"
 
 	# Adapted from https://gist.github.com/Tavernari/01d21584f8d4d8ccea8ceca305656ab3
 	local HISTORY_CONTEXT=""
