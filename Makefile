@@ -13,6 +13,10 @@ UNAME_S := $(shell uname -s)
 
 INSTALL_DIR ?= /usr/local/bin
 
+RALPH := $(CURDIR)/src/ralph.bash
+
+SHELL_FILES := $(shell find . -type f -name "*.sh" -o -name "*.bash")
+
 ##@ Environment setup
 
 .PHONY: setup
@@ -40,7 +44,7 @@ check: check/lint ## Check code for linting and quality issues
 
 .PHONY: check/lint
 check/lint: ## Check code for linting and quality issues
-	shellcheck ralph
+	shellcheck $(SHELL_FILES)
 
 ##@ Utilities
 
@@ -56,7 +60,7 @@ install: env-INSTALL_DIR ## Install the project
 	else
 		INSTALL="sudo install"
 	fi
-	$${INSTALL} -l s -m 755 "$(CURDIR)/ralph" "$(INSTALL_DIR)/ralph"
+	$${INSTALL} -l s -m 755 "$(RALPH)" "$(INSTALL_DIR)/ralph"
 
 ##@ Helpers
 
