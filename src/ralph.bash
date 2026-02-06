@@ -2,21 +2,45 @@
 
 set -euo pipefail
 
+STDIN=/dev/stdin
+
 FORCE=false
 VERBOSE=false
 ITERATIONS=10
 INIT=false
 TASK_FILE=""
 RALPH_DIR="$(pwd)/.ralph"
+DEFAULT_TASK_FILE="${RALPH_DIR}/tasks"
 
 usage() {
 	cat <<- EOF
-		Usage: ralph [options] [init|<filepath>]
+		Usage: ralph [options] [subcommand]
+
+		Options:
 		    -h, --help                   Show this help message and exit
-		    -f, --force                  Force the operation, even if it is already completed
 		    -v, --verbose                Enable verbose output
+		    -f <file>, --file <file>     Specify a task file (default: read from stdin, or .ralph/$(basename "${DEFAULT_TASK_FILE}"), or the lexicographically first .md/.txt file in $(basename "${RALPH_DIR}")
 		    -n <num>, --iterations <num> Number of iterations to perform (default: 10)
+		    --force                      Force the task to run even if it is marked as completed
+
+		Subcommands:
+		    init                          Initialize the Ralph environment in the current directory
 	EOF
+}
+
+error() {
+	echo "Error: $1" >&2
+}
+
+fatal() {
+	error "$1"
+	exit 1
+}
+
+fatal-with-usage() {
+	error "$1"
+	usage
+	exit 1
 }
 
 verbose() {
@@ -32,22 +56,32 @@ parse-args() {
 				usage
 				exit 0
 				;;
-			-f|--force)
+			--force)
 				FORCE=true
 				shift
+				;;
+			-f|--file)
+				if [[ $# -gt 1 && "$2" != -* ]]; then
+					TASK_FILE="$2"
+					shift 2
+				else
+					fatal-with-usage "$1 requires a value"
+				fi
 				;;
 			-v|--verbose)
 				VERBOSE=true
 				shift
 				;;
 			-n|--iterations)
-				if [[ -n "$2" && "$2" != -* ]]; then
+				if [[ $# -gt 1 ]]; then
 					ITERATIONS="$2"
+					if ! [[ "${ITERATIONS}" =~ ^[0-9]+$ ]]; then
+						fatal-with-usage "$1 must be a positive integer"
+					fi
 					shift 2
 				else
-					echo "Error: --iterations requires a value"
-					usage
-					exit 1
+					fatal-with-usage "$1 requires a value"
+				fi
 				;;
 			*)
 				break
@@ -59,7 +93,7 @@ parse-args() {
 		if [[ "$1" == "init" ]]; then
 			INIT=true
 		else
-			TASK_FILE="$1"
+			fatal-with-usage "Unknown subcommand: $1"
 		fi
 	fi
 }
@@ -87,12 +121,23 @@ main() {
 	mkdir -p "${RALPH_DIR}"
 	if [[ -z "${TASK_FILE}" ]]; then
 		# Check if stdin has input
-		if [ -t 0 ]; then
-			echo "No task file provided and no input from stdin. Exiting."
-			exit 1
+		if [ ! -t 0 ]; then
+			TASK_FILE="${STDIN}"
 		else
-			TASK_FILE="/dev/stdin"
+			# Select first file by name of DEFAULT_TASK_FILE, or any text extension
+			if [[ -f "${DEFAULT_TASK_FILE}" ]]; then
+				TASK_FILE="${DEFAULT_TASK_FILE}"
+			else
+				TASK_FILE=$(find "${RALPH_DIR}" -maxdepth 1 -type f \( -name "*.md" -o -name "*.txt" \) | sort | head -n 1)
+				if [[ -z "${TASK_FILE}" ]]; then
+					fatal-with-usage "No task file provided and no suitable files found in $(basename "${RALPH_DIR}"). Exiting."
+				fi
+			fi
 		fi
+	fi
+
+	if [[ "${TASK_FILE}" != "${STDIN}" && ! -f "${TASK_FILE}" ]]; then
+		fatal "Task file not found: ${TASK_FILE}"
 	fi
 	
 	verbose "Task file: ${TASK_FILE}"
@@ -112,8 +157,13 @@ main() {
 	# Do iterations
 	for i in $(seq 1 "${ITERATIONS}"); do
 		verbose "Iteration ${i}/${ITERATIONS}"
-		
+		ralph-loop "${TASK_FILE}"
 	done
+}
+
+ralph-loop() {
+	verbose "Processing task file: $1"
+	
 }
 
 main "$@"
