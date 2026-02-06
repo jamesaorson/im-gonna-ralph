@@ -138,6 +138,11 @@ main() {
 		# Check if stdin has input
 		if [ ! -t 0 ]; then
 			TASK_FILE="${STDIN}"
+			# If reading from stdin, capture it to a file so it can be reused per-iteration
+			mkdir -p "${RALPH_DIR}"
+			TASK_FILE_CAPTURE="${RALPH_DIR}/task_from_stdin.txt"
+			cat "${STDIN}" > "${TASK_FILE_CAPTURE}"
+			TASK_FILE="${TASK_FILE_CAPTURE}"
 		else
 			# Select first file by name of DEFAULT_TASK_FILE, or any text extension
 			if [[ -f "${DEFAULT_TASK_FILE}" ]]; then
@@ -172,6 +177,11 @@ main() {
 	local ITERATION_DIR
 	ITERATION_DIR="${RALPH_DIR}/$(date +%Y%m%d_%H%M%S)"
 	mkdir -p "${ITERATION_DIR}"
+
+	# Copy original task file into iteration dir for record
+	if [[ -f "${TASK_FILE}" ]]; then
+		cp "${TASK_FILE}" "${ITERATION_DIR}/task_file.txt"
+	fi
 
 	if [[ -f "${RALPH_DIR}/.done" ]]; then
 		echo "Task already completed. Use --force to re-run."
