@@ -228,7 +228,11 @@ ralph-loop() {
 		if [[ -d "${IMPORT_RUN}" ]]; then
 			echo "   (Importing history from ${IMPORT_RUN}...)"
 			# Iterate over iteration files in sorted order
-			for f in $(ls "${IMPORT_RUN}"/iteration_*.txt 2>/dev/null | sort); do
+			for f in "${IMPORT_RUN}"/iteration_*.txt; do
+				# If no matching files, the glob remains literal; skip non-existent
+				if [ ! -e "$f" ]; then
+					continue
+				fi
 				local PREV_BASENAME
 				PREV_BASENAME=$(basename "$f")
 				local PREV_IDX
