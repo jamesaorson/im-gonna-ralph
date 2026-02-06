@@ -15,6 +15,7 @@ TASK_FILE=""
 RALPH_DIR="$(pwd)/.ralph"
 DONE_FILE="${RALPH_DIR}/.done"
 DEFAULT_TASK_FILE="${RALPH_DIR}/tasks"
+IMPORT_RUN=""
 
 usage() {
 	cat <<- EOF
@@ -25,8 +26,9 @@ usage() {
 		    -v, --verbose                Enable verbose output
 		    -f <file>, --file <file>     Specify a task file (default: read from stdin, or .ralph/$(basename "${DEFAULT_TASK_FILE}"), or the lexicographically first .md/.txt file in $(basename "${RALPH_DIR}")
 		    -n <num>, --iterations <num> Number of iterations to perform (default: ${DEFAULT_ITERATIONS})
-			-m <model>, --model <model>  Specify the AI model to use (default: ${DEFAULT_MODEL})
+		    -m <model>, --model <model>  Specify the AI model to use (default: ${DEFAULT_MODEL})
 		    --force                      Force the task to run even if it is marked as completed
+	        --import-run <dir>           Import iteration files from a previous run directory as starting memory
 
 		Subcommands:
 		    init                          Initialize the Ralph environment in the current directory
@@ -64,6 +66,14 @@ parse-args() {
 			--force)
 				FORCE=true
 				shift
+				;;
+			--import-run)
+				if [[ $# -gt 1 && "$2" != -* ]]; then
+					IMPORT_RUN="$2"
+					shift 2
+				else
+					fatal-with-usage "$1 requires a value"
+				fi
 				;;
 			-f|--file)
 				if [[ $# -gt 1 && "$2" != -* ]]; then
@@ -213,6 +223,24 @@ ralph-loop() {
 	# Adapted from https://gist.github.com/Tavernari/01d21584f8d4d8ccea8ceca305656ab3
 	local HISTORY_CONTEXT=""
 	
+	# If specified, import history files from another run directory
+	if [[ -n "${IMPORT_RUN}" ]]; then
+		if [[ -d "${IMPORT_RUN}" ]]; then
+			echo "   (Importing history from ${IMPORT_RUN}...)"
+			# Iterate over iteration files in sorted order
+			for f in $(ls "${IMPORT_RUN}"/iteration_*.txt 2>/dev/null | sort); do
+				local PREV_BASENAME
+				PREV_BASENAME=$(basename "$f")
+				local PREV_IDX
+				PREV_IDX=$(echo "${PREV_BASENAME}" | sed -E 's/.*iteration_([0-9]+)\.txt/\1/')
+				STEP_CONTENT=$(cat "$f")
+				HISTORY_CONTEXT+=$'\n'"--- IMPORTED HISTORY (${IMPORT_RUN_DIR}) (Iteration #${PREV_IDX}) ---"$'\n'"${STEP_CONTENT}"$'\n'
+			done
+		else
+			echo "Warning: import run dir '${IMPORT_RUN_DIR}' not found" >&2
+		fi
+	fi
+
 	if [ "${ITERATION}" -gt 1 ]; then
 		echo "   (Reading memory from previous iterations...)"
 		for (( i=0; i < ITERATION; i++ )); do
