@@ -1,0 +1,6 @@
+[*.bash]
+indent_style = tab
+indent_size = unspecified
+[*.sh]
+indent_style = tab
+indent_size = unspecified
