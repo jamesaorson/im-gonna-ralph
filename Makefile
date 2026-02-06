@@ -22,6 +22,27 @@ SHELL_FILES := $(shell find . -type f -name "*.sh" -o -name "*.bash")
 .PHONY: setup
 setup: setup/shellcheck ## Setup development environment
 
+.PHONY: setup/copilot
+setup/copilot:
+	if command -v copilot &> /dev/null; then
+		echo "GitHub Copilot CLI is already installed."
+		exit 0
+	fi
+ifeq ($(UNAME_S),Linux)
+	npm install -g @github/copilot
+else ifeq ($(UNAME_S),Darwin)
+	if command -v brew &> /dev/null; then
+		brew install copilot-cli
+	elif command -v npm &> /dev/null; then
+		npm install -g @github/copilot
+	else
+		echo "Error: Neither Homebrew nor npm is available. Please install one of them to proceed."
+		exit 1
+	fi
+else
+	
+endif
+
 .PHONY: setup/shellcheck
 setup/shellcheck: ## Install shellcheck
 	if command -v shellcheck &> /dev/null; then
