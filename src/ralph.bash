@@ -238,10 +238,10 @@ ralph-loop() {
 				local PREV_IDX
 				PREV_IDX=$(echo "${PREV_BASENAME}" | sed -E 's/.*iteration_([0-9]+)\.txt/\1/')
 				STEP_CONTENT=$(cat "$f")
-				HISTORY_CONTEXT+=$'\n'"--- IMPORTED HISTORY (${IMPORT_RUN_DIR}) (Iteration #${PREV_IDX}) ---"$'\n'"${STEP_CONTENT}"$'\n'
+				HISTORY_CONTEXT+=$'\n'"--- IMPORTED HISTORY (${IMPORT_RUN}) (Iteration #${PREV_IDX}) ---"$'\n'"${STEP_CONTENT}"$'\n'
 			done
 		else
-			echo "Warning: import run dir '${IMPORT_RUN_DIR}' not found" >&2
+			echo "Warning: import run dir '${IMPORT_RUN}' not found" >&2
 		fi
 	fi
 
