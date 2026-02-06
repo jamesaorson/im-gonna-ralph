@@ -189,7 +189,7 @@ ralph-loop() {
 	# Adapted from https://gist.github.com/Tavernari/01d21584f8d4d8ccea8ceca305656ab3
 	local HISTORY_CONTEXT=""
 	
-	if [ "${ITERATION}" -gt 0 ]; then
+	if [ "${ITERATION}" -gt 1 ]; then
 		echo "   (Reading memory from previous iterations...)"
 		for (( i=0; i < ITERATION; i++ )); do
 			local PREV_FILE
