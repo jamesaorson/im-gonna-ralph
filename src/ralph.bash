@@ -4,9 +4,12 @@ set -euo pipefail
 
 STDIN=/dev/stdin
 
+DEFAULT_MODEL=gpt-5-mini
+MODEL="${MODEL:-$DEFAULT_MODEL}"
 FORCE=false
 VERBOSE=false
-ITERATIONS=10
+DEFAULT_ITERATIONS=10
+ITERATIONS="${ITERATIONS:-$DEFAULT_ITERATIONS}"
 INIT=false
 TASK_FILE=""
 RALPH_DIR="$(pwd)/.ralph"
@@ -21,7 +24,8 @@ usage() {
 		    -h, --help                   Show this help message and exit
 		    -v, --verbose                Enable verbose output
 		    -f <file>, --file <file>     Specify a task file (default: read from stdin, or .ralph/$(basename "${DEFAULT_TASK_FILE}"), or the lexicographically first .md/.txt file in $(basename "${RALPH_DIR}")
-		    -n <num>, --iterations <num> Number of iterations to perform (default: 10)
+		    -n <num>, --iterations <num> Number of iterations to perform (default: ${DEFAULT_ITERATIONS})
+			-m <model>, --model <model>  Specify the AI model to use (default: ${DEFAULT_MODEL})
 		    --force                      Force the task to run even if it is marked as completed
 
 		Subcommands:
@@ -79,6 +83,14 @@ parse-args() {
 					if ! [[ "${ITERATIONS}" =~ ^[0-9]+$ ]]; then
 						fatal-with-usage "$1 must be a positive integer"
 					fi
+					shift 2
+				else
+					fatal-with-usage "$1 requires a value"
+				fi
+				;;
+			-m|--model)
+				if [[ $# -gt 1 ]]; then
+					MODEL="$2"
 					shift 2
 				else
 					fatal-with-usage "$1 requires a value"
@@ -218,7 +230,7 @@ LOOP INSTRUCTIONS:
 5. If not finished, briefly describe your progress and what you expect should be done in the next iteration.
 "
 
-	OUTPUT=$(copilot --allow-all-tools --allow-all-urls -p "$FULL_PROMPT")
+	OUTPUT=$(copilot --allow-all-tools --allow-all-urls --model "${MODEL}" -p "$FULL_PROMPT")
 
 	local CURRENT_LOG_FILE
 	CURRENT_LOG_FILE="${ITERATION_DIR}/iteration_${ITERATION}.txt"

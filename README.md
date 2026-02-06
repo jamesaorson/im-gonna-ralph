@@ -46,6 +46,34 @@ Or create a symlink to the script:
 ln -s "$(pwd)/src/ralph.bash" "/usr/local/bin/ralph"
 ```
 
+## Examples
+
+### Example 1: Create a new feature
+
+```bash
+ralph init
+ralph --verbose <(<< 'EOF'
+Create a function in src/math.js that:
+1. Exports a function called 'isPrime'
+2. Takes a number as input
+3. Returns true if the number is prime, false otherwise
+4. Includes proper error handling
+EOF
+)
+```
+
+### Example 2: Fix bugs
+
+```bash
+echo "Fix all TODO comments in the codebase" | ralph --iterations 15
+```
+
+### Example 3: Refactoring
+
+```bash
+ralph --file .ralph/refactor-task.md --verbose
+```
+
 ## Usage
 
 ### Basic Usage
@@ -163,34 +191,6 @@ make clean
 2. Run checks: `make check`
 3. Test your changes locally
 4. Submit a pull request
-
-## Examples
-
-### Example 1: Create a new feature
-
-```bash
-ralph init
-ralph --verbose <(<< 'EOF'
-Create a function in src/math.js that:
-1. Exports a function called 'isPrime'
-2. Takes a number as input
-3. Returns true if the number is prime, false otherwise
-4. Includes proper error handling
-EOF
-)
-```
-
-### Example 2: Fix bugs
-
-```bash
-echo "Fix all TODO comments in the codebase" | ralph --iterations 15
-```
-
-### Example 3: Refactoring
-
-```bash
-ralph --file .ralph/refactor-task.md --verbose
-```
 
 ## Contributing
 
