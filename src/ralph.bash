@@ -230,7 +230,11 @@ LOOP INSTRUCTIONS:
 5. If not finished, briefly describe your progress and what you expect should be done in the next iteration.
 "
 
-	OUTPUT=$(copilot --allow-all-tools --allow-all-urls --model "${MODEL}" -p "$FULL_PROMPT")
+	if ${VERBOSE}; then
+		OUTPUT=$(copilot --allow-all-tools --allow-all-urls --model "${MODEL}" -p "$FULL_PROMPT" | tee /dev/stderr)
+	else
+		OUTPUT=$(copilot --allow-all-tools --allow-all-urls --model "${MODEL}" -p "$FULL_PROMPT")
+	fi
 
 	local CURRENT_LOG_FILE
 	CURRENT_LOG_FILE="${ITERATION_DIR}/iteration_${ITERATION}.txt"
