@@ -28,7 +28,7 @@ usage() {
 		    -n <num>, --iterations <num> Number of iterations to perform (default: ${DEFAULT_ITERATIONS})
 		    -m <model>, --model <model>  Specify the AI model to use (default: ${DEFAULT_MODEL})
 		    --force                      Force the task to run even if it is marked as completed
-	        --import-run <dir>           Import iteration files from a previous run directory as starting memory
+	      --import-run <dir>           Import iteration files from a previous run directory as starting memory
 
 		Subcommands:
 		    init                          Initialize the Ralph environment in the current directory
@@ -270,6 +270,7 @@ LOOP INSTRUCTIONS:
 3. YOU are responsible for ensuring the code works. Run your own internal checks/tests if possible.
 4. If the task is 100% COMPLETE and TESTED, create a '${DONE_FILE}' file.
 5. If not finished, briefly describe your progress and what you expect should be done in the next iteration.
+6. DO NOT use git automatically and commit changes. Let the user handle this. Also NEVER commit stuff found in .gitignore
 "
 
 	if ${VERBOSE}; then
